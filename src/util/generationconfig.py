@@ -1,0 +1,24 @@
+
+CONTRAST_CREATIVE = {
+
+}
+    
+BEAM_CREATIVE = {
+
+}
+    
+GREEDY_CREATIVE = {
+
+}
+
+CONTRAST_DETERMINISTIC = {
+    
+}
+
+BEAM_DETERMINISTIC = {
+
+}
+
+GREEDY_DETERMINISTIC = {
+
+}
