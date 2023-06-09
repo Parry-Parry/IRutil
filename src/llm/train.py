@@ -3,7 +3,6 @@ from typing import List
 from .lora_llm import init_llama, generate_and_tokenize_prompt
 from ..util import LlamaConfig, LoraConfig
 from ..util.modelconfig import load_model_config
-from ..util.generationconfig import load_generation_config
 
 from datasets import load_dataset
 import transformers
@@ -18,7 +17,6 @@ def main(datasuffix : str,
          outputdir : str,
          prompt_file : str, 
          model_name : str = "7B",
-         generation_type : str = "greedy",
          batch_size : int = 128,
          micro_batch_size : int = 4,
          lr : float = 3e-4,
@@ -66,7 +64,7 @@ def main(datasuffix : str,
         task_type="CAUSAL_LM",
     )
 
-    cfg = LlamaConfig.build_llama_config(load_model_config(model_name), load_generation_config(generation_type))
+    cfg = LlamaConfig.build_llama_config(load_model_config(model_name))
     model, tokenizer = init_llama(cfg, loracfg, resume_from_checkpoint=resume_from_checkpoint)
 
     '''
