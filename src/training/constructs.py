@@ -8,10 +8,11 @@ def dataset_from_idx(dataset, triplets=None, cut=None, RND=42, nproc=0):
     if nproc:
         from multiprocessing import Pool
         idx = zip(frame['query_id'].tolist(), frame['doc_id_a'].tolist(), frame['doc_id_b'].tolist())
-        def construct(q, a, b):
+        def construct(idx):
+            q, a, b = idx
             return {'query' : queries[q], 'pid' : docs[a], 'nid' : docs[b]}
         with Pool(nproc) as p:
-            res = p.map(lambda x : construct(*x), idx)
+            res = p.map(construct, idx)
         return pd.DataFrame.from_records(res)
     else:
         frame['query'] = frame['query_id'].apply(lambda x: queries[x])

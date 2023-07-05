@@ -6,8 +6,6 @@ from os.path import join
 import torch
 from transformers import LlamaForCausalLM, LlamaTokenizer
 
-from LightChain import Prompt
-
 '''
 Basic PEFT setup from https://github.com/tloen/alpaca-lora/blob/main/finetune.py
 '''

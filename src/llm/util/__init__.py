@@ -7,17 +7,15 @@ import os
 class LlamaConfig:
     size : str = '7B'
     modelconfig : dict = {}
-    generationconfig : dict = {}
     adapter : str = None
     device : str = 'cuda'
 
     @staticmethod
     def build_llama_config(modelconfig : dict,
-                           generationconfig : dict,
                            adapter : str = None,  
                            device : str = 'cuda'):
         size = modelconfig.pop('size', '7B')
-        return LlamaConfig(size=size, modelconfig=modelconfig, generationconfig=generationconfig, adapter=adapter, device=device)
+        return LlamaConfig(size=size, modelconfig=modelconfig, adapter=adapter, device=device)
 
 @dataclass
 class Log:

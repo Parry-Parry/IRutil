@@ -1,2 +1,2 @@
-def prepare_packet(text : str, config : LlamaConfig):
-    return dict(text=text, config=config.__dict__)
+def prepare_packet(text : str, config : dict):
+    return dict(data=text, config=config.__dict__)

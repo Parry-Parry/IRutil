@@ -1,33 +1,44 @@
+from transformers import GenerationConfig
 
 CONTRAST_CREATIVE = {
-
+    'topk' : 10,
+    'do_sample' : True,
+    'penalty_alpha' : 0.5,
+    'temperature' : 2.0,
 }
     
-BEAM_CREATIVE = {
-
+BEAM_SEARCH = {
+    'num_beams' : 10,
+    'num_return_sequences' : 1,
+    'no_repeat_ngram_size' : 1,
+    'remove_invalid_values' : True,
 }
     
-GREEDY_CREATIVE = {
-
+GREEDY_SMOOTH = {
+    'num_beams': 1,
+    'do_sample': False,
+    'temperature': 2.0,
 }
 
 CONTRAST_DETERMINISTIC = {
-    
-}
-
-BEAM_DETERMINISTIC = {
-
+    'topk' : 10,
+    'do_sample' : False,
+    'penalty_alpha' : 0.5,
+    'temperature' : 0.1,
 }
 
 GREEDY_DETERMINISTIC = {
-
+    'num_beams': 1,
+    'do_sample': False,
+    'temperature': 0.1,
 }
 
-load_generation_config = {
+def load_generation_config(type, **kwargs):
+    types = {
     "contrast_creative": CONTRAST_CREATIVE,
-    "beam_creative": BEAM_CREATIVE,
-    "greedy_creative": GREEDY_CREATIVE,
+    "beam_search":BEAM_SEARCH,
+    "greedy_smooth": GREEDY_SMOOTH,
     "contrast_deterministic": CONTRAST_DETERMINISTIC,
-    "beam_deterministic": BEAM_DETERMINISTIC,
     "greedy_deterministic": GREEDY_DETERMINISTIC,
-}
+    }
+    return GenerationConfig({**types[type], **kwargs})
