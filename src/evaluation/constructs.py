@@ -11,7 +11,7 @@ def generate_experiment(*models, dataset=None, **kwargs):
         qrels = dataset.get_qrels()
 
     args = {
-        "retr_systems" : list(*models),
+        "retr_systems" : list(models),
         "topics" : topics,
         "qrels" : qrels,
         "metrics" : kwargs.get("metrics", ["map", "ndcg_cut_10", "mrr"]),

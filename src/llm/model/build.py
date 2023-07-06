@@ -1,36 +1,18 @@
-from typing import Optional
 from ..util import LlamaConfig
 import os
 import sys
 from os.path import join
 import torch
-from transformers import LlamaForCausalLM, LlamaTokenizer
+from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
+from accelerate import load_checkpoint_and_dispatch, init_empty_weights
 
-'''
-Basic PEFT setup from https://github.com/tloen/alpaca-lora/blob/main/finetune.py
-'''
-
-from peft import (
-    LoraConfig,
-    get_peft_model,
-    get_peft_model_state_dict,
-    prepare_model_for_int8_training,
-    set_peft_model_state_dict,
-    PeftModel
-)
 
 def build_llama(config : LlamaConfig):
     llama_dir = join(os.getenv('LLAMA_DIR'), f'llama{config.size}')
-    tokenizer = LlamaTokenizer.from_pretrained(llama_dir)
+    tokenizer = AutoTokenizer.from_pretrained(llama_dir)
     tokenizer.pad_token_id = (0)
     tokenizer.padding_side = "left"  # Allow batched inference
-    model = LlamaForCausalLM.from_pretrained(llama_dir, **config.modelconfig)
-    if config.adapter: 
-        model = PeftModel.from_pretrained(model,
-                                          config.adapter,
-                                          torch_dtype=torch.float16,
-                                        )
-        
+    model = AutoModelForCausalLM.from_pretrained(llama_dir, **config.modelconfig)
     model.eval()
 
     if torch.__version__ >= "2" and sys.platform != "win32":
@@ -38,44 +20,22 @@ def build_llama(config : LlamaConfig):
 
     return model, tokenizer
 
-def init_llama(config, lora_config : Optional[LoraConfig] = None, resume_from_checkpoint : Optional[str] = None):
+def init_llama(config):
     llama_dir = join(os.getenv('LLAMA_DIR'), f'llama{config.size}')
-    tokenizer = LlamaTokenizer.from_pretrained(llama_dir)
+    tokenizer = AutoTokenizer.from_pretrained(llama_dir)
+    config = AutoConfig.from_pretrained(llama_dir, **config.modelconfig)
     tokenizer.pad_token_id = (0)
     tokenizer.padding_side = "left"  # Allow batched inference
-    model = LlamaForCausalLM.from_pretrained(llama_dir, **config.modelconfig)
 
-    if lora_config:
-        model = get_peft_model(model, lora_config)
-        model = prepare_model_for_int8_training(model)
+    with init_empty_weights():
+        model = AutoModelForCausalLM.from_pretrained(config)
 
-        model.config.use_cache = False
+    model.tie_weights()
+    model = load_checkpoint_and_dispatch(
+        model, llama_dir, device_map="auto", no_split_module_classes=["GPTJBlock"]
+    )
 
-        old_state_dict = model.state_dict
-        model.state_dict = (
-            lambda self, *_, **__: get_peft_model_state_dict(
-                self, old_state_dict()
-            )
-        ).__get__(model, type(model))
-    
-    if resume_from_checkpoint:
-        checkpoint_name = os.path.join(
-            resume_from_checkpoint, "pytorch_model.bin"
-        )  # Full checkpoint
-        if not os.path.exists(checkpoint_name):
-            checkpoint_name = os.path.join(
-                resume_from_checkpoint, "adapter_model.bin"
-            )  # only LoRA model - LoRA config above has to fit
-            resume_from_checkpoint = (
-                False  # So the trainer won't try loading its state
-            )
-        # The two files above have a different name depending on how they were saved, but are actually the same.
-        if os.path.exists(checkpoint_name):
-            print(f"Restarting from {checkpoint_name}")
-            adapters_weights = torch.load(checkpoint_name)
-            set_peft_model_state_dict(model, adapters_weights)
-        else:
-            print(f"Checkpoint {checkpoint_name} not found")
+    model.eval()
 
     if torch.__version__ >= "2" and sys.platform != "win32":
         model = torch.compile(model)

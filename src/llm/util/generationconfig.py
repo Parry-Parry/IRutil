@@ -1,4 +1,4 @@
-from transformers import GenerationConfig
+import json
 
 CONTRAST_CREATIVE = {
     'topk' : 10,
@@ -41,4 +41,4 @@ def load_generation_config(type, **kwargs):
     "contrast_deterministic": CONTRAST_DETERMINISTIC,
     "greedy_deterministic": GREEDY_DETERMINISTIC,
     }
-    return GenerationConfig({**types[type], **kwargs})
+    return json.dumps({**types[type], **kwargs})

@@ -7,15 +7,13 @@ import os
 class LlamaConfig:
     size : str = '7B'
     modelconfig : dict = {}
-    adapter : str = None
     device : str = 'cuda'
 
     @staticmethod
-    def build_llama_config(modelconfig : dict,
-                           adapter : str = None,  
+    def build_llama_config(modelconfig : dict, 
                            device : str = 'cuda'):
         size = modelconfig.pop('size', '7B')
-        return LlamaConfig(size=size, modelconfig=modelconfig, adapter=adapter, device=device)
+        return LlamaConfig(size=size, modelconfig=modelconfig, device=device)
 
 @dataclass
 class Log:
@@ -46,10 +44,10 @@ class LogStore:
     
 def init_out(dir : str, subdirs : List[str] = ['models']):
     if not os.path.exists(dir):
-        os.makedirs(dir)
+        os.makedirs(dir, exist_ok=True)
     for subdir in subdirs:
         if not os.path.exists(os.path.join(dir, subdir)):
-            os.makedirs(os.path.join(dir, subdir))
+            os.makedirs(os.path.join(dir, subdir), exist_ok=True)
     
 def dump_logs(logs : LogStore, dir : str):
     import json
