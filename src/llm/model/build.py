@@ -8,7 +8,7 @@ from accelerate import load_checkpoint_and_dispatch, init_empty_weights
 
 
 def build_llama(config : LlamaConfig):
-    llama_dir = join(os.getenv('LLAMA_DIR'), f'llama{config.size}')
+    llama_dir = join(os.getenv('LLAMA_DIR'), f'llama-{config.size}')
     tokenizer = AutoTokenizer.from_pretrained(llama_dir)
     tokenizer.pad_token_id = (0)
     tokenizer.padding_side = "left"  # Allow batched inference
@@ -21,7 +21,7 @@ def build_llama(config : LlamaConfig):
     return model, tokenizer
 
 def init_llama(config):
-    llama_dir = join(os.getenv('LLAMA_DIR'), f'llama{config.size}')
+    llama_dir = join(os.getenv('LLAMA_DIR'), f'llama-{config.size}')
     tokenizer = AutoTokenizer.from_pretrained(llama_dir)
     config = AutoConfig.from_pretrained(llama_dir, **config.modelconfig)
     tokenizer.pad_token_id = (0)
@@ -32,7 +32,7 @@ def init_llama(config):
 
     model.tie_weights()
     model = load_checkpoint_and_dispatch(
-        model, llama_dir, device_map="auto", no_split_module_classes=["GPTJBlock"]
+        model, llama_dir, device_map="auto"
     )
 
     model.eval()
