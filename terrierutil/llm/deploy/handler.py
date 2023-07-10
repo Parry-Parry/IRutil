@@ -1,31 +1,29 @@
 from abc import ABC
 import logging
-import ast
 import json
+import os
 
 import torch
-from torchserve.torch_handler.base_handler import BaseHandler
+from ts.torch_handler.base_handler import BaseHandler
 
-from terrierutil.llm.model.lora_llm import init_llama
-from terrierutil.llm.util import LlamaConfig
+from terrierutil.llm.model.build import init_causallm
 
 logger = logging.getLogger(__name__)
 
-
-class TransformersLlamaHandler(BaseHandler, ABC):
+class TransformersLLMHandler(BaseHandler, ABC):
     def __init__(self):
-        super(TransformersLlamaHandler, self).__init__()
+        super(TransformersLLMHandler, self).__init__()
         self.initialized = False
+        self.cfg = None
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-
+        size = os.getenv('MODEL_SIZE')
         properties = ctx.system_properties
-        model_dir = properties.get("model_dir")
-        self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
 
-        cfg = LlamaConfig.build_llama_config(properties.get("model_config"), self.device)
-        self.model, self.tokenizer = init_llama(cfg)
+        model_dir = os.getenv(properties.model_yaml_config[size]['dir_env_var'])
+        self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
+        self.model, self.tokenizer = init_causallm(model_dir=model_dir, tokenizer_dir=model_dir, device=self.device)
 
         logger.debug('Transformer model from path {0} loaded successfully'.format(model_dir))
 
@@ -46,14 +44,18 @@ class TransformersLlamaHandler(BaseHandler, ABC):
             input_text = data.get("data")
             _cfg = data.get("config")
             if _cfg is not None and cfg is None: 
-                cfg = json.loads(_cfg)
+                self.cfg = json.loads(_cfg)
+                max_length = self.cfg["max_input_length"]
+
+            if self.cfg is None: 
+                cfg = {}
+                max_length = 128
 
             if input_text is None:
                 input_text = data.get("body")
             if isinstance(input_text, (bytes, bytearray)):
                 input_text = input_text.decode("utf-8")
         
-            max_length = self.setup_config["max_length"]
             logger.info("Received text: '%s'", input_text)
             # preprocessing text for sequence_classification, token_classification or text_generation
 
@@ -79,12 +81,12 @@ class TransformersLlamaHandler(BaseHandler, ABC):
                     )
         return (input_ids_batch, attention_mask_batch), cfg
 
-    def inference(self, input_batch, cfg):
+    def inference(self, input_batch):
         input_ids_batch, attention_mask_batch = input_batch
         inferences = []
            
         outputs = self.model.generate(
-            input_ids_batch, **cfg
+            input_ids_batch, **self.cfg['generation_params']
         )
 
         for i, x in enumerate(outputs):
@@ -122,7 +124,7 @@ class TransformersLlamaHandler(BaseHandler, ABC):
         return input_ids, ref_input_ids, attention_mask
 
 
-_service = TransformersLlamaHandler()
+_service = TransformersLLMHandler()
 
 def handle(data, context):
     try:

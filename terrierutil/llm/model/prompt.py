@@ -2,7 +2,6 @@ import logging
 from typing import List
 import json
 
-
 class Prompt:
     def __init__(self, prompt : str, params : List[str] = None, name='Standard Prompt', description='Standard Prompt'):
         self.prompt = prompt
@@ -31,8 +30,8 @@ class Prompt:
         return json.dumps(self, default=lambda x: x.__dict__, 
             sort_keys=True, indent=4)
     
-    def construct(self, **kwargs):
-        for key in kwargs: 
+    def construct(self, kwargs):
+        for key in kwargs.keys(): 
             if key not in self.params:
                 logging.warning(f'Key {key} not found in params {self.params}')
                 kwargs.pop(key)

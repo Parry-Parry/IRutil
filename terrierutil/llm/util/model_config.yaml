@@ -1,0 +1,17 @@
+
+7B:
+  size : "7B"
+  dir_env_var : "LLAMA_7B_DIR"
+
+16B:
+  size : "16B"
+  dir_env_var : "LLAMA_16B_DIR"
+
+30B:
+  size : "30B"
+  dir_env_var : "LLAMA_30B_DIR"
+
+60B:
+  size : "60B"
+  dir_env_var : "LLAMA_60B_DIR"
+  

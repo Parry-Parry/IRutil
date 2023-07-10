@@ -2,6 +2,10 @@ from dataclasses import dataclass, asdict
 from json import dumps
 from typing import List
 import os
+import json
+import pycurl
+from io import BytesIO 
+from urllib.parse import urlencode
 
 @dataclass
 class LlamaConfig:
@@ -56,3 +60,17 @@ def dump_logs(logs : LogStore, dir : str):
         json.dump(logs.test_metrics, f, indent=4)
     with open(join(dir, 'logs.json'), 'w') as f:
         json.dump(logs.json, f, default=lambda o : o.__dict__, indent=4)
+
+def send_request(address : str, text : str, generation_config : dict = {}, **kwargs):
+    crl = pycurl.Curl() 
+    buffer = BytesIO()
+    crl.setopt(crl.WRITEDATA, buffer)
+    crl.setopt(crl.URL, address)
+    data_str = json.dumps({'data' : text, 'config' : {'generation_params' : generation_config, **kwargs}})
+    pf = urlencode(data_str)
+    crl.setopt(crl.POSTFIELDS, pf)
+    crl.perform()
+    crl.close()
+
+    body = buffer.getvalue()
+    return body.decode('utf-8')
