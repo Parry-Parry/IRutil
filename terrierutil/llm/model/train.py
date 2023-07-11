@@ -1,6 +1,6 @@
 from functools import partial
 from typing import List
-from .lora_llm import init_llama, generate_and_tokenize_prompt
+from terrierutil.llm.model.build import init_causallm, generate_and_tokenize_prompt
 from ..util import LlamaConfig, LoraConfig
 from ..util.modelconfig import load_model_config
 

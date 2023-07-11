@@ -48,7 +48,7 @@ class TransformersLLMHandler(BaseHandler, ABC):
                 max_length = self.cfg["max_input_length"]
 
             if self.cfg is None: 
-                cfg = {}
+                self.cfg = {}
                 max_length = 128
 
             if input_text is None:
@@ -69,7 +69,8 @@ class TransformersLLMHandler(BaseHandler, ABC):
 
             input_ids = inputs["input_ids"].to(self.device)
             attention_mask = inputs["attention_mask"].to(self.device)
-     
+
+            input_ids_batch = None
             if input_ids.shape is not None:
                 if input_ids_batch is None:
                     input_ids_batch = input_ids
@@ -79,7 +80,7 @@ class TransformersLLMHandler(BaseHandler, ABC):
                     attention_mask_batch = torch.cat(
                         (attention_mask_batch, attention_mask), 0
                     )
-        return (input_ids_batch, attention_mask_batch), cfg
+        return (input_ids_batch, attention_mask_batch)
 
     def inference(self, input_batch):
         input_ids_batch, attention_mask_batch = input_batch
