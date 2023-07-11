@@ -1,6 +1,4 @@
-import os
 import sys
-from os.path import join
 import torch
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from accelerate import load_checkpoint_and_dispatch, init_empty_weights
@@ -10,7 +8,7 @@ TODO:
     - Add adapter support
 '''
 
-def init_causallm(model_dir, tokenizer_dir=None, **kwargs):
+def init_causallm_acc(model_dir, tokenizer_dir=None, **kwargs):
     if tokenizer_dir is None: tokenizer_dir = model_dir
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
     config = AutoConfig.from_pretrained(model_dir, **kwargs)
@@ -24,6 +22,21 @@ def init_causallm(model_dir, tokenizer_dir=None, **kwargs):
     model = load_checkpoint_and_dispatch(
         model, model_dir, device_map="auto"
     )
+
+    model.eval()
+
+    if torch.__version__ >= "2" and sys.platform != "win32":
+        model = torch.compile(model)
+
+    return model, tokenizer
+
+def init_causallm(model_dir, tokenizer_dir=None, **kwargs):
+    if tokenizer_dir is None: tokenizer_dir = model_dir
+    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+    tokenizer.pad_token_id = (0)
+    tokenizer.padding_side = "left"  # Allow batched inference
+
+    model = AutoModelForCausalLM.from_pretrained(model_dir, **kwargs).cuda()
 
     model.eval()
 
