@@ -3,7 +3,6 @@ from json import dumps
 from typing import List
 import os
 import json
-import pycurl
 from io import BytesIO 
 from urllib.parse import urlencode
 
@@ -61,7 +60,8 @@ def dump_logs(logs : LogStore, dir : str):
     with open(join(dir, 'logs.json'), 'w') as f:
         json.dump(logs.json, f, default=lambda o : o.__dict__, indent=4)
 
-def send_request(address : str, text : str, generation_config : dict = {}, **kwargs):
+'''
+def send_request_pycurl(address : str, text : str, generation_config : dict = {}, **kwargs):
     crl = pycurl.Curl() 
     buffer = BytesIO()
     crl.setopt(crl.WRITEDATA, buffer)
@@ -74,3 +74,9 @@ def send_request(address : str, text : str, generation_config : dict = {}, **kwa
 
     body = buffer.getvalue()
     return body.decode('utf-8')
+'''
+
+def send_request(address : str, text : str, generation_config : dict = {}, **kwargs):
+    data_str = json.dumps({'data' : text, 'config' : {'generation_params' : generation_config, **kwargs}})
+    pf = urlencode(data_str)
+    return os.popen(f'curl -X POST -d {pf} {address}').read()
