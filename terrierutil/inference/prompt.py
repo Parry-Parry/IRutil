@@ -1,16 +1,15 @@
 import logging 
 from typing import List
 import json
+import re
 
 class Prompt:
-    def __init__(self, prompt : str, params : List[str] = None, name='Standard Prompt', description='Standard Prompt'):
+    pattern = r'/[^{}]+(?=})/g'
+    def __init__(self, prompt : str, name='Standard Prompt', description='Standard Prompt'):
         self.prompt = prompt
-        self.params = params
+        self.params = re.findall(self.pattern, prompt)
         self.name = name
         self.description = description
-
-        if params:
-            for param in params: assert f'{{{param}}}' in prompt, f'Param {param} not found in prompt {prompt}'
         
     def __str__(self):
         return self.prompt
@@ -23,8 +22,8 @@ class Prompt:
         return json.loads(json_str, object_hook=lambda x: Prompt(**x))
     
     @staticmethod
-    def fromstring(string : str, params=None, name='Standard Prompt', description='Standard Prompt'):
-        return Prompt(prompt=string, params=params, name=name, description=description)
+    def fromstring(string : str, name='Standard Prompt', description='Standard Prompt'):
+        return Prompt(prompt=string, name=name, description=description)
     
     def tojson(self):
         return json.dumps(self, default=lambda x: x.__dict__, 
