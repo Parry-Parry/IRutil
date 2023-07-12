@@ -37,7 +37,7 @@ app = FastAPI(
 app.add_middleware(CORSMiddleware, allow_origins=["*"])
 
 # Mount static folder, like demo pages, if any
-app.mount("/static", StaticFiles(directory="static/"), name="static")
+#app.mount("/static", StaticFiles(directory="static/"), name="static")
 
 # Load custom exception handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
