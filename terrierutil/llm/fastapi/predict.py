@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
 from typing import List, Tuple
 import torch
 from terrierutil.llm.fastapi.config import CONFIG
@@ -20,7 +17,7 @@ def preprocess(package: dict, text : List[str]) -> list:
     inputs = package["tokenizer"].encode_plus(
         text,
         max_length=CONFIG['max_input_length'],
-        pad_to_max_length=True,
+        padding='longest',
         add_special_tokens=True,
         return_tensors="pt",
     )
