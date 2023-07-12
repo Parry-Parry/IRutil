@@ -77,6 +77,7 @@ def send_request_pycurl(address : str, text : str, generation_config : dict = {}
 '''
 
 def send_request(address : str, text : str, generation_config : dict = {}, **kwargs):
-    data_str = json.dumps({'data' : text, 'config' : {'generation_params' : generation_config, **kwargs}})
+    max_input = kwargs.pop('max_input', 128)
+    data_str = json.dumps({'data' : text, 'config' : {'max_input_length': max_input, 'generation_params' : generation_config, **kwargs}})
     pf = urlencode(data_str)
     return os.popen(f'curl -X POST -d {pf} {address}').read()

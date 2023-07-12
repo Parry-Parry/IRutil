@@ -1,4 +1,3 @@
-
 7B:
   size : "7B"
   dir_env_var : "LLAMA_7B_DIR"
@@ -14,4 +13,3 @@
 60B:
   size : "60B"
   dir_env_var : "LLAMA_60B_DIR"
-  
