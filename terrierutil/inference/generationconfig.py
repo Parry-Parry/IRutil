@@ -44,4 +44,4 @@ def load_generation_config(type, **kwargs):
     "contrast_deterministic": CONTRAST_DETERMINISTIC,
     "greedy_deterministic": GREEDY_DETERMINISTIC,
     }
-    return json.dumps({**types[type], **kwargs})
+    return {**types[type], **kwargs}
