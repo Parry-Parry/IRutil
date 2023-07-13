@@ -30,11 +30,13 @@ class Prompt:
             sort_keys=True, indent=4)
     
     def construct(self, kwargs):
+        arguments = {}
         for key in kwargs.keys(): 
             if key not in self.params:
                 logging.warning(f'Key {key} not found in params {self.params}')
-                kwargs.pop(key)
-        return self.prompt.format(**kwargs)
+            else:
+                arguments[key] = kwargs[key]
+        return self.prompt.format(**arguments)
     
     def batch_construct(self, params : List[dict], num_proc : int):
         '''
