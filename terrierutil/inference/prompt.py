@@ -47,7 +47,7 @@ class Prompt:
         Ensure that params is a list of dicts and large enough to justify overhead of multiprocessing
         '''
         if num_proc is None:
-            return [self.construct(**param) for param in params]
+            return [self.construct(param) for param in params]
         from multiprocessing import Pool, cpu_count
         if num_proc is None: num_proc = cpu_count()
         with Pool(num_proc) as p:
