@@ -36,7 +36,11 @@ class Prompt:
                 logging.warning(f'Key {key} not found in params {self.params}')
             else:
                 arguments[key] = kwargs[key]
-        return self.prompt.format(**arguments)
+        try:
+            return self.prompt.format(**arguments)
+        except KeyError as e:
+            logging.ERROR(f'Missing Args, Error: {e}')
+            return ""
     
     def batch_construct(self, params : List[dict], num_proc : int):
         '''
