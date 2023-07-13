@@ -4,7 +4,7 @@ import json
 import re
 
 class Prompt:
-    pattern = r'/[^{}]+(?=})/g'
+    pattern = r"\{([^}]+)\}"
     def __init__(self, prompt : str, name='Standard Prompt', description='Standard Prompt'):
         self.prompt = prompt
         self.params = re.findall(self.pattern, prompt)
