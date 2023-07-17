@@ -57,4 +57,4 @@ class Prompt:
         if isinstance(inp, list):
             return self.batch_construct(inp, num_proc=num_proc)
         else:
-            return self.construct(**inp)
+            return self.construct(inp)
