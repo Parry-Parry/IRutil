@@ -14,7 +14,7 @@ def send_request(url : List[str], text : str, generation_params : dict = {}, op 
     header = {"Content-type": "application/json",
               "accept": 'application/json'} 
     payload = json.dumps({'text' : text, 'generation_params' : generation_params})
-    response_decoded_json = requests.post(url, data=payload, headers=header)
+    response_decoded_json = requests.post(url, data=payload, headers=header, verify=False)
     result = response_decoded_json.json()
     if result['error']:
         return result
