@@ -1,8 +1,22 @@
 import json
-import os
+import requests
+from typing import List
+import numpy as np
+from dataclasses import dataclass
 
-def send_request(address : str, text : str, generation_params : dict = {}, op : str = 'POST'):
-    data_str = json.dumps({'text' : text, 'generation_params' : generation_params})
-    args = f"curl -X '{op}' '{address}' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{data_str}'"
-    return json.loads(os.popen(args).read())
-    
+@dataclass
+class APIOutput:
+    def __init__(self, package) -> None:
+        self.text = package['results']['text']
+        self.logits = np.array(package['results']['logits'])
+
+def send_request(url : List[str], text : str, generation_params : dict = {}, op : str = 'POST'):
+    header = {"Content-type": "application/json",
+              "accept": 'application/json'} 
+    payload = json.dumps({'text' : text, 'generation_params' : generation_params})
+    response_decoded_json = requests.post(url, data=payload, headers=header)
+    result = response_decoded_json.json()
+    if result['error']:
+        return result
+    else:
+        return APIOutput(result)

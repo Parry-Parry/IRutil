@@ -1,5 +1,3 @@
-import json
-
 CONTRAST_CREATIVE = {
     'top_k' : 10,
     'do_sample' : True,
